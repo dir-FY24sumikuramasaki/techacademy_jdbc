@@ -7,15 +7,15 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.PreparedStatement;
 
 
-public class DbConnectSample03 {
+public class DbConnectSample04 {
 
     public static void main(String[] args) {
 
         Connection con = null;
-        Statement stmt = null;
+        PreparedStatement pstmt = null;
         ResultSet rs= null;
         
         try {
@@ -28,19 +28,26 @@ public class DbConnectSample03 {
                     "root",
                     "Sumimasa@3530"
                     );
+            
+            String sql = "SELECT * FROM country WHERE Name = ?";
             // 3. DBとやりとりする窓口（Statementオブジェクト）の作成
-            stmt = con.createStatement();
+            pstmt = con.prepareStatement(sql);
   
             // 4, 5. Select文の実行と結果を格納／代入
             System.out.print("検索キーワードを入力してください > ");
             String input = keyIn();
             
-            String sql = "select * from country where Name = '" + input + "'";
-            rs = stmt.executeQuery(sql);
+            pstmt.setString(1, input);
+            
+            rs = pstmt.executeQuery();
+            
             // 6. 結果を表示する[
             while( rs.next() ) {
                 String name = rs.getString("Name");
+                
                 int population = rs.getInt("Population"); 
+                
+                
                 System.out.println(name);
                 System.out.println(population);
             }
@@ -60,9 +67,9 @@ public class DbConnectSample03 {
                 e.printStackTrace();
             }
             }
-            if( stmt != null) {
+            if( pstmt != null) {
                 try {
-                    stmt.close();
+                    pstmt.close();
                 }catch(SQLException e) {
                     System.err.println("Statementを閉じるときにエラーが発生しました。");
                     e.printStackTrace();
